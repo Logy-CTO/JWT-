@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
-    //JWTUtil 주입
     private final JWTUtil jwtUtil;
 
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
@@ -43,28 +42,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-
+        //csrf disable
         http
                 .csrf((auth) -> auth.disable());
 
+        //From 로그인 방식 disable
         http
                 .formLogin((auth) -> auth.disable());
 
+        //http basic 인증 방식 disable
         http
                 .httpBasic((auth) -> auth.disable());
+
 
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
-        //JWTFilter 등록
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
-
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
+        //세션 설정
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

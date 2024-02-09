@@ -1,7 +1,6 @@
 package com.example.springjwt.JWT;
 
 import io.jsonwebtoken.Jwts;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ public class JWTUtil {
 
     public JWTUtil(@Value("${spring.jwt.secret}")String secret) {
 
-        secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
     public String getUsername(String token) {
@@ -34,6 +33,7 @@ public class JWTUtil {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+
 
     public String createJwt(String username, String role, Long expiredMs) {
 
